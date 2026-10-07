@@ -14,9 +14,12 @@ const inner = (s) => s.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/,
 const viewBox = (s) => s.match(/viewBox="([^"]+)"/)[1];
 
 const ORANGE = '#FF4F0E';
+// Geometria desenhada no espaço da referência (900px) e exportada em escala 600px.
+const SCALE = 600 / 900;
+const DPR = 3;          // densidade dos PNGs (nítido em telas retina e no zoom do celular)
 const W = 507;          // largura do card da esquerda
 const SLICE_H = 150;    // altura da fatia superior (resto é HTML)
-const BORDER = 2;
+const BORDER = 1.5;   // = 1px na escala final
 
 // Polígono arredondado: insere o polígono em r e desenha com stroke 2r + linejoin round.
 function roundedPoly(points, r, fill) {
@@ -43,7 +46,7 @@ function blackCard() {
 }
 
 const dotz = svg('dotz-logo');
-const top = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${SLICE_H}" viewBox="0 0 ${W} ${SLICE_H}">
+const top = `<svg xmlns="http://www.w3.org/2000/svg" width="${W * SCALE}" height="${SLICE_H * SCALE}" viewBox="0 0 ${W} ${SLICE_H}">
   ${orangeShape()}
   ${blackCard()}
   <svg x="401" y="21" width="84" height="27" viewBox="${viewBox(dotz)}">${inner(dotz)}</svg>
@@ -51,28 +54,29 @@ const top = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${SLIC
 
 const bf = svg('black-friday-logo');
 const RW = 384, RH = 225;
-const right = `<svg xmlns="http://www.w3.org/2000/svg" width="${RW}" height="${RH}" viewBox="0 0 ${RW} ${RH}">
-  <rect x="0.5" y="0.5" width="${RW - 1}" height="${RH - 1}" rx="9.5" fill="${ORANGE}"/>
-  <rect x="${BORDER}" y="${BORDER}" width="${RW - 2 * BORDER}" height="${RH - 2 * BORDER}" rx="7.5" fill="#000"/>
+const right = `<svg xmlns="http://www.w3.org/2000/svg" width="${RW * SCALE}" height="${RH * SCALE}" viewBox="0 0 ${RW} ${RH}">
+  <rect x="0" y="0" width="${RW}" height="${RH}" rx="10" fill="${ORANGE}"/>
+  <rect x="${BORDER}" y="${BORDER}" width="${RW - 2 * BORDER}" height="${RH - 2 * BORDER}" rx="8" fill="#000"/>
   <svg x="53" y="56" width="277" height="113" viewBox="${viewBox(bf)}">${inner(bf)}</svg>
 </svg>`;
 
+const ICON = 18 * SCALE;
 const icon = (name) => {
   const s = svg(name);
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="${viewBox(s)}" preserveAspectRatio="xMidYMid meet">${inner(s)}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${ICON}" height="${ICON}" viewBox="${viewBox(s)}" preserveAspectRatio="xMidYMid meet">${inner(s)}</svg>`;
 };
 
 const jobs = [
-  ['topo', top, W, SLICE_H],
-  ['black-friday', right, RW, RH],
-  ['facebook', icon('facebook'), 18, 18],
-  ['instagram', icon('instagram'), 18, 18],
-  ['linkedin', icon('linkedin'), 18, 18],
-  ['youtube', icon('youtube'), 18, 18],
+  ['topo', top, W * SCALE, SLICE_H * SCALE],
+  ['black-friday', right, RW * SCALE, RH * SCALE],
+  ['facebook', icon('facebook'), ICON, ICON],
+  ['instagram', icon('instagram'), ICON, ICON],
+  ['linkedin', icon('linkedin'), ICON, ICON],
+  ['youtube', icon('youtube'), ICON, ICON],
 ];
 
 const browser = await playwright.chromium.launch();
-const page = await browser.newPage({ deviceScaleFactor: 2 });
+const page = await browser.newPage({ deviceScaleFactor: DPR });
 for (const [name, markup, w, h] of jobs) {
   await page.setViewportSize({ width: w, height: h });
   await page.setContent(`<html><body style="margin:0;background:transparent">${markup}</body></html>`);
