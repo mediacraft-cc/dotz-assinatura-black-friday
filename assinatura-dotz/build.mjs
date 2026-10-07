@@ -52,7 +52,9 @@ const top = `<svg xmlns="http://www.w3.org/2000/svg" width="${W * SCALE}" height
   <svg x="401" y="21" width="84" height="27" viewBox="${viewBox(dotz)}">${inner(dotz)}</svg>
 </svg>`;
 
-const bf = svg('black-friday-logo');
+// Os paths 8 e 9 preenchem um recorte do "D"; um traço fino da mesma cor esconde a emenda (linha cinza) entre eles.
+const sealSeams = (s) => { let i = -1; return s.replace(/<path /g, (m) => (++i === 8 || i === 9 ? '<path stroke="white" stroke-width="0.6" stroke-linejoin="round" ' : m)); };
+const bf = sealSeams(svg('black-friday-logo'));
 const RW = 384, RH = 225;
 const right = `<svg xmlns="http://www.w3.org/2000/svg" width="${RW * SCALE}" height="${RH * SCALE}" viewBox="0 0 ${RW} ${RH}">
   <rect x="0" y="0" width="${RW}" height="${RH}" rx="10" fill="${ORANGE}"/>
